@@ -46,7 +46,7 @@
             this.btn_South = new System.Windows.Forms.Button();
             this.btn_West = new System.Windows.Forms.Button();
             this.rtb_Location = new System.Windows.Forms.RichTextBox();
-            this.rtb_MEssage = new System.Windows.Forms.RichTextBox();
+            this.rtb_Messages = new System.Windows.Forms.RichTextBox();
             this.dgv_Inventory = new System.Windows.Forms.DataGridView();
             this.dgv_Quests = new System.Windows.Forms.DataGridView();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Inventory)).BeginInit();
@@ -158,6 +158,7 @@
             this.btn_UseWeapon.TabIndex = 11;
             this.btn_UseWeapon.Text = "Use";
             this.btn_UseWeapon.UseVisualStyleBackColor = true;
+            this.btn_UseWeapon.Click += new System.EventHandler(this.btn_UseWeapon_Click);
             // 
             // btn_UsePotion
             // 
@@ -167,6 +168,7 @@
             this.btn_UsePotion.TabIndex = 12;
             this.btn_UsePotion.Text = "Use";
             this.btn_UsePotion.UseVisualStyleBackColor = true;
+            this.btn_UsePotion.Click += new System.EventHandler(this.btn_UsePotion_Click);
             // 
             // btn_North
             // 
@@ -176,6 +178,7 @@
             this.btn_North.TabIndex = 13;
             this.btn_North.Text = "North";
             this.btn_North.UseVisualStyleBackColor = true;
+            this.btn_North.Click += new System.EventHandler(this.btn_North_Click);
             // 
             // btn_East
             // 
@@ -185,6 +188,7 @@
             this.btn_East.TabIndex = 14;
             this.btn_East.Text = "East";
             this.btn_East.UseVisualStyleBackColor = true;
+            this.btn_East.Click += new System.EventHandler(this.btn_East_Click);
             // 
             // btn_South
             // 
@@ -194,6 +198,7 @@
             this.btn_South.TabIndex = 15;
             this.btn_South.Text = "South";
             this.btn_South.UseVisualStyleBackColor = true;
+            this.btn_South.Click += new System.EventHandler(this.btn_South_Click);
             // 
             // btn_West
             // 
@@ -203,6 +208,7 @@
             this.btn_West.TabIndex = 16;
             this.btn_West.Text = "West";
             this.btn_West.UseVisualStyleBackColor = true;
+            this.btn_West.Click += new System.EventHandler(this.btn_West_Click);
             // 
             // rtb_Location
             // 
@@ -213,13 +219,13 @@
             this.rtb_Location.TabIndex = 17;
             this.rtb_Location.Text = "";
             // 
-            // rtb_MEssage
+            // rtb_Messages
             // 
-            this.rtb_MEssage.Location = new System.Drawing.Point(347, 130);
-            this.rtb_MEssage.Name = "rtb_MEssage";
-            this.rtb_MEssage.Size = new System.Drawing.Size(360, 286);
-            this.rtb_MEssage.TabIndex = 18;
-            this.rtb_MEssage.Text = "";
+            this.rtb_Messages.Location = new System.Drawing.Point(347, 130);
+            this.rtb_Messages.Name = "rtb_Messages";
+            this.rtb_Messages.Size = new System.Drawing.Size(360, 286);
+            this.rtb_Messages.TabIndex = 18;
+            this.rtb_Messages.Text = "";
             // 
             // dgv_Inventory
             // 
@@ -262,7 +268,7 @@
             this.ClientSize = new System.Drawing.Size(719, 651);
             this.Controls.Add(this.dgv_Quests);
             this.Controls.Add(this.dgv_Inventory);
-            this.Controls.Add(this.rtb_MEssage);
+            this.Controls.Add(this.rtb_Messages);
             this.Controls.Add(this.rtb_Location);
             this.Controls.Add(this.btn_West);
             this.Controls.Add(this.btn_South);
@@ -310,7 +316,7 @@
         private System.Windows.Forms.Button btn_South;
         private System.Windows.Forms.Button btn_West;
         private System.Windows.Forms.RichTextBox rtb_Location;
-        private System.Windows.Forms.RichTextBox rtb_MEssage;
+        private System.Windows.Forms.RichTextBox rtb_Messages;
         private System.Windows.Forms.DataGridView dgv_Inventory;
         private System.Windows.Forms.DataGridView dgv_Quests;
     }
