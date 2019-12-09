@@ -1,0 +1,12 @@
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\bin\Release\SimpleCSharpRpgGame.exe.config
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\bin\Release\SimpleCSharpRpgGame.exe
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\bin\Release\SimpleCSharpRpgGame.pdb
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\bin\Release\Engine.dll
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\bin\Release\Engine.pdb
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\obj\Release\SimpleCSharpRpgGame.csprojAssemblyReference.cache
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\obj\Release\SimpleCSharpRpgGame.Properties.Resources.resources
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\obj\Release\SimpleCSharpRpgGame.SimpleRpgFormGame.resources
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\obj\Release\SimpleCSharpRpgGame.csproj.GenerateResource.cache
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\obj\Release\SimpleCSharpRpgGame.csproj.CopyComplete
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\obj\Release\SimpleCSharpRpgGame.exe
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\obj\Release\SimpleCSharpRpgGame.pdb

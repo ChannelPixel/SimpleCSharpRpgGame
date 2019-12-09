@@ -21,36 +21,120 @@ namespace SimpleCSharpRpgGame
         {
             InitializeComponent();
 
-            Location location = new Location(1, "Home", "This is your house");
-
             _player = new Player(10, 10, 20 , 0, 1);
+
+            MoveTo(World.LocationByID(World.LOCATION_ID_HOME));
+
+            _player.Inventory.Add(new InventoryItem(World.ItemByID(World.ITEM_ID_RUSTY_SWORD),1));
 
             lbl_HitPoints.Text = _player.CurrentHitPoints.ToString();
             lbl_Gold.Text = _player.Gold.ToString();
             lbl_Experience.Text = _player.ExperiencePoints.ToString();
             lbl_Level.Text = _player.Level.ToString();
+
+            UpdateInventoryListInUI();
+            UpdatePotionListInUI();
+            UpdateQuestListInUI();
+            UpdateWeaponListInUI();
+        }
+
+        private void UpdateInventoryListInUI()
+        {
+            dgv_Inventory.RowHeadersVisible = false;
+            dgv_Inventory.ColumnCount = 2;
+            dgv_Inventory.Columns[0].Name = "Name";
+            dgv_Inventory.Columns[0].Width = 197;
+            dgv_Inventory.Columns[1].Name = "Quantity";
+            dgv_Inventory.Rows.Clear();
+            foreach (InventoryItem inventoryItem in _player.Inventory)
+            {
+                if (inventoryItem.Quantity > 0)
+                {
+                    dgv_Inventory.Rows.Add(new[] { 
+                        inventoryItem.Details.Name,
+                        inventoryItem.Quantity.ToString() });
+                }
+            }
+        }
+
+        private void UpdateQuestListInUI()
+        {
+            dgv_Quests.RowHeadersVisible = false;
+            dgv_Quests.ColumnCount = 2;
+            dgv_Quests.Columns[0].Name = "Name";
+            dgv_Quests.Columns[0].Width = 197;
+            dgv_Quests.Columns[1].Name = "Done?";
+            dgv_Quests.Rows.Clear();
+            foreach (PlayerQuest playerQuest in _player.Quests)
+            {
+                dgv_Quests.Rows.Add(new[] {
+                    playerQuest.Details.Name,
+                    playerQuest.IsCompleted.ToString() });
+            }
+        }
+
+        private void UpdateWeaponListInUI()
+        {
+            List<Weapon> weapons = new List<Weapon>();
+            foreach (InventoryItem inventoryItem in _player.Inventory)
+            {
+                if (inventoryItem.Details is Weapon)
+                {
+                    if (inventoryItem.Quantity > 0)
+                    {
+                        weapons.Add((Weapon)inventoryItem.Details);
+                    }
+                }
+            }
+            if (weapons.Count == 0)
+            {
+                cbo_Weapons.Visible = false;
+                btn_UseWeapon.Visible = false;
+            }
+            else
+            {
+                cbo_Weapons.DataSource = weapons;
+                cbo_Weapons.DisplayMember = "Name";
+                cbo_Weapons.ValueMember = "ID";
+                cbo_Weapons.SelectedIndex = 0;
+            }
+        }
+
+        private void UpdatePotionListInUI()
+        {
+            List<HealingPotion> healingPotions = new List<HealingPotion>();
+            foreach (InventoryItem inventoryItem in _player.Inventory)
+            {
+                if (inventoryItem.Details is HealingPotion)
+                {
+                    if (inventoryItem.Quantity > 0)
+                    {
+                        healingPotions.Add(
+                        (HealingPotion)inventoryItem.Details);
+                    }
+                }
+            }
+            if (healingPotions.Count == 0)
+            {
+                cbo_Potions.Visible = false;
+                btn_UsePotion.Visible = false;
+            }
+            else
+            {
+                cbo_Potions.DataSource = healingPotions;
+                cbo_Potions.DisplayMember = "Name";
+                cbo_Potions.ValueMember = "ID";
+                cbo_Potions.SelectedIndex = 0;
+            }
         }
 
         private void MoveTo(Location newLocation)
         {
-            if(newLocation.ItemRequiredToEnter != null)
-            {
-                bool playerHasRequiredItem = false;
-
-                foreach(InventoryItem ii in _player.Inventory)
-                {
-                    if(ii.Details.ID == newLocation.ItemRequiredToEnter.ID)
-                    {
-                        playerHasRequiredItem = true;
-                        break;
-                    }
-                }
-
-                if(!playerHasRequiredItem)
+                if (!_player.HasRequiredItemToEnterThisLocation(newLocation))
                 {
                     rtb_Messages.Text += "You must have a " +
-                        newLocation.ItemRequiredToEnter.Name +
-                        " to enter this location" + Environment.NewLine;
+                    newLocation.ItemRequiredToEnter.Name +
+                    " to enter this location." + Environment.NewLine;
                     return;
                 }
 
@@ -70,53 +154,14 @@ namespace SimpleCSharpRpgGame
 
                 if(newLocation.QuestAvailableHere != null)
                 {
-                    bool playerAlreadyHasQuest = false;
-                    bool playerAlreadyCompletedQuest = false;
+                    bool playerAlreadyHasQuest = _player.HasThisQuest(newLocation.QuestAvailableHere);
+                    bool playerAlreadyCompletedQuest = _player.CompletedThisQuest(newLocation.QuestAvailableHere);
 
-                    foreach(PlayerQuest playerQuest in _player.Quests)
-                    {
-                        playerAlreadyHasQuest = true;
-
-                        if(playerQuest.IsCompleted)
-                        {
-                            playerAlreadyCompletedQuest = true;
-                        }
-                    }
-
-                    if(playerAlreadyHasQuest)
+                    if (playerAlreadyHasQuest)
                     {
                         if(!playerAlreadyCompletedQuest)
                         {
-                            bool playerHasAllItemsToCompleteQuest = true;
-
-                            foreach(QuestCompletionItem qci in newLocation.QuestAvailableHere.QuestCompletionItems)
-                            {
-                                bool foundItemInPlayersInventory = false;
-
-                                foreach(InventoryItem ii in _player.Inventory)
-                                {
-                                    if(ii.Details.ID == qci.Details.ID)
-                                    {
-                                        foundItemInPlayersInventory = true;
-
-                                        if(ii.Quantity < qci.Quantity)
-                                        {
-                                            playerHasAllItemsToCompleteQuest = false;
-
-                                            break;
-                                        }
-
-                                        break;
-                                    }
-
-                                    if(!foundItemInPlayersInventory)
-                                    {
-                                        playerHasAllItemsToCompleteQuest = false;
-
-                                        break;
-                                    }
-                                }
-                            }
+                            bool playerHasAllItemsToCompleteQuest = _player.HasAllQuestCompletionItems(newLocation.QuestAvailableHere);
 
                             if(playerHasAllItemsToCompleteQuest)
                             {
@@ -125,17 +170,11 @@ namespace SimpleCSharpRpgGame
                                     newLocation.QuestAvailableHere.Name +
                                     " quest." + Environment.NewLine;
 
-                                foreach(QuestCompletionItem qci in newLocation.QuestAvailableHere.QuestCompletionItems)
-                                {
-                                    foreach(InventoryItem ii in _player.Inventory)
-                                    {
-                                        if(ii.Details.ID == qci.Details.ID)
-                                        {
-                                            ii.Quantity -= qci.Quantity;
-                                            break;
-                                        }
-                                    }
-                                }
+                                _player.RemoveQuestCompletionItems(newLocation.QuestAvailableHere);
+                                _player.ExperiencePoints += newLocation.QuestAvailableHere.RewardExperiencePoints;
+                                _player.Gold += newLocation.QuestAvailableHere.RewardGold;
+                                _player.AddItemToInventory(newLocation.QuestAvailableHere.RewardItem);
+                                _player.MarkQuestCompleted(newLocation.QuestAvailableHere);
 
                                 rtb_Messages.Text += "You receive: " + Environment.NewLine;
                                 rtb_Messages.Text +=
@@ -144,38 +183,6 @@ namespace SimpleCSharpRpgGame
                                     newLocation.QuestAvailableHere.RewardGold.ToString() + " gold" + Environment.NewLine;
                                 rtb_Messages.Text +=
                                     newLocation.QuestAvailableHere.RewardItem.Name.ToString() + Environment.NewLine;
-
-                                _player.ExperiencePoints += newLocation.QuestAvailableHere.RewardExperiencePoints;
-                                _player.Gold += newLocation.QuestAvailableHere.RewardGold;
-
-                                bool addedItemToPlayerInventory = false;
-
-                                foreach(InventoryItem ii in _player.Inventory)
-                                {
-                                    if(ii.Details.ID == newLocation.QuestAvailableHere.RewardItem.ID)
-                                    {
-                                        ii.Quantity++;
-
-                                        addedItemToPlayerInventory = true;
-
-                                        break;
-                                    }
-                                }
-
-                                if(!addedItemToPlayerInventory)
-                                {
-                                    _player.Inventory.Add(new InventoryItem(newLocation.QuestAvailableHere.RewardItem, 1));
-                                }
-
-                                foreach(PlayerQuest pq in _player.Quests)
-                                {
-                                    if (pq.Details.ID == newLocation.QuestAvailableHere.ID)
-                                    {
-                                        pq.IsCompleted = true;
-
-                                        break;
-                                    }
-                                }
                             }
                         }
                     }
@@ -205,7 +212,6 @@ namespace SimpleCSharpRpgGame
                         rtb_Messages.Text += Environment.NewLine;
 
                         _player.Quests.Add(new PlayerQuest(newLocation.QuestAvailableHere));
-
                     }
                 }
 
@@ -240,116 +246,179 @@ namespace SimpleCSharpRpgGame
                     btn_UseWeapon.Visible = false;
                 }
 
-                dgv_Inventory.RowHeadersVisible = false;
-                dgv_Inventory.ColumnCount = 2;
-                dgv_Inventory.Columns[0].Name = "Name";
-                dgv_Inventory.Columns[0].Width = 197;
-                dgv_Inventory.Columns[1].Name = "Quantity";
-                dgv_Inventory.Rows.Clear();
-                foreach(InventoryItem inventoryItem in _player.Inventory)
-                {
-                    if(inventoryItem.Quantity > 0)
-                    {
-                        dgv_Inventory.Rows.Add(new[] { inventoryItem.Details.Name,
-                            inventoryItem.Quantity.ToString()});
-                    }
-                }
-
-                dgv_Quests.RowHeadersVisible = false;
-                dgv_Quests.ColumnCount = 2;
-                dgv_Quests.Columns[0].Name = "Name";
-                dgv_Quests.Columns[0].Width = 197;
-                dgv_Quests.Columns[1].Name = "Done?";
-                dgv_Quests.Rows.Clear();
-                foreach(PlayerQuest playerQuest in _player.Quests)
-                {
-                    dgv_Quests.Rows.Add(new[] { playerQuest.Details.Name,
-                        playerQuest.IsCompleted.ToString()});
-                }
-
-                List<Weapon> weapons = new List<Weapon>();
-                foreach(InventoryItem inventoryItem in _player.Inventory)
-                {
-                    if(inventoryItem.Details is Weapon)
-                    {
-                        if(inventoryItem.Quantity > 0)
-                        {
-                            weapons.Add((Weapon)inventoryItem.Details);
-                        }
-                    }
-                }
-
-                if(weapons.Count == 0)
-                {
-                    cbo_Weapons.Visible = false;
-                    btn_UsePotion.Visible = false;
-                }
-                else
-                {
-                    cbo_Weapons.DataSource = weapons;
-                    cbo_Weapons.DisplayMember = "Name";
-                    cbo_Weapons.ValueMember = "ID";
-
-                    cbo_Weapons.SelectedIndex = 0;
-                }
-
-                List<HealingPotion> healingPotions = new List<HealingPotion>();
-
-                foreach(InventoryItem inventoryItem in _player.Inventory)
-                {
-                    if(inventoryItem.Details is HealingPotion)
-                    {
-                        if(inventoryItem.Quantity > 0)
-                        {
-                            healingPotions.Add((HealingPotion)inventoryItem.Details);
-                        }
-                    }
-                }
-
-                if(healingPotions.Count == 0)
-                {
-                    cbo_Potions.Visible = false;
-                    btn_UsePotion.Visible = false;
-                }
-                else
-                {
-                    cbo_Potions.DataSource = healingPotions;
-                    cbo_Potions.DisplayMember = "Name";
-                    cbo_Potions.ValueMember = "ID";
-                    cbo_Potions.SelectedIndex = 0;
-                }
-            }
+                UpdateInventoryListInUI();
+                UpdateQuestListInUI();
+                UpdateWeaponListInUI();
+                UpdatePotionListInUI();
 
         }
 
         private void btn_North_Click(object sender, EventArgs e)
         {
-
+            MoveTo(_player.CurrentLocation.LocationToNorth);
         }
 
         private void btn_West_Click(object sender, EventArgs e)
         {
-
+            MoveTo(_player.CurrentLocation.LocationToWest);
         }
 
         private void btn_East_Click(object sender, EventArgs e)
         {
-
+            MoveTo(_player.CurrentLocation.LocationToEast);
         }
 
         private void btn_South_Click(object sender, EventArgs e)
         {
-
+            MoveTo(_player.CurrentLocation.LocationToSouth);
         }
 
         private void btn_UseWeapon_Click(object sender, EventArgs e)
         {
+            Weapon currentWeapon = (Weapon)cbo_Weapons.SelectedItem;
 
+            int damageToMonster = RandomNumberGenerator.NumberBetween(
+                currentWeapon.MinimumDamage,
+                currentWeapon.MaximumDamage);
+
+            _currentMonster.CurrentHitPoints -= damageToMonster;
+
+            rtb_Messages.Text += "You hit the " +
+                _currentMonster.Name + " for " +
+                damageToMonster.ToString() + " points." + Environment.NewLine;
+
+            if(_currentMonster.CurrentHitPoints <= 0)
+            {
+                rtb_Messages.Text += Environment.NewLine;
+                rtb_Messages.Text += "You defeated the " + _currentMonster.Name +
+                    Environment.NewLine;
+
+                _player.ExperiencePoints += _currentMonster.RewardExperiencePoints;
+                rtb_Messages.Text += "You receive " +
+                    _currentMonster.RewardExperiencePoints.ToString() + " experience points" + Environment.NewLine;
+
+                _player.Gold += _currentMonster.RewardGold;
+                rtb_Messages.Text += "You receive " +
+                    _currentMonster.RewardGold.ToString() + " gold" + Environment.NewLine;
+
+                List<InventoryItem> lootedItems = new List<InventoryItem>();
+
+                foreach(LootItem lootItem in _currentMonster.LootTable)
+                {
+                    if(RandomNumberGenerator.NumberBetween(1,100) <= lootItem.DropPercentage)
+                    {
+                        lootedItems.Add(new InventoryItem(lootItem.Details, 1));
+                    }
+                }
+
+                if(lootedItems.Count == 0)
+                {
+                    foreach(LootItem lootItem in _currentMonster.LootTable)
+                    {
+                        if (lootItem.IsDefaultItem)
+                        {
+                            lootedItems.Add(new InventoryItem(lootItem.Details, 1));
+                        }
+                    }
+                }
+
+                foreach(InventoryItem inventoryItem in lootedItems)
+                {
+                    _player.AddItemToInventory(inventoryItem.Details);
+
+                    if (inventoryItem.Quantity == 1)
+                    {
+                        rtb_Messages.Text += "You loot " +
+                        inventoryItem.Quantity.ToString() + " " +
+                        inventoryItem.Details.Name + Environment.NewLine;
+                    }
+                    else
+                    {
+                        rtb_Messages.Text += "You loot " +
+                        inventoryItem.Quantity.ToString() + " " +
+                        inventoryItem.Details.NamePlural + Environment.NewLine;
+                    }
+                }
+
+                lbl_HitPoints.Text = _player.CurrentHitPoints.ToString();
+                lbl_Gold.Text = _player.Gold.ToString();
+                lbl_Experience.Text = _player.ExperiencePoints.ToString();
+                lbl_Level.Text = _player.Level.ToString();
+
+                UpdateInventoryListInUI();
+                UpdateWeaponListInUI();
+                UpdatePotionListInUI();
+
+                rtb_Messages.Text += Environment.NewLine;
+
+                MoveTo(_player.CurrentLocation);
+            }
+            else
+            {
+                int damageToPlayer = RandomNumberGenerator.NumberBetween(
+                    0,
+                    _currentMonster.MaximumDamage);
+
+                rtb_Messages.Text += "The " + _currentMonster.Name + " did " +
+                    damageToPlayer.ToString() + " points of damage." + Environment.NewLine;
+
+                _player.CurrentHitPoints -= damageToPlayer;
+
+                lbl_HitPoints.Text = _player.CurrentHitPoints.ToString();
+
+                if(_player.CurrentHitPoints <= 0)
+                {
+                    rtb_Messages.Text += "The " + _currentMonster.Name + " killed you" +
+                        Environment.NewLine;
+
+                    MoveTo(World.LocationByID(World.LOCATION_ID_HOME));
+                }
+            }
         }
 
         private void btn_UsePotion_Click(object sender, EventArgs e)
         {
+            HealingPotion potion = (HealingPotion)cbo_Potions.SelectedItem;
 
+            _player.CurrentHitPoints = (_player.CurrentHitPoints + potion.AmountToHeal);
+
+            if(_player.CurrentHitPoints > _player.MaximumHitPoints)
+            {
+                _player.CurrentHitPoints = _player.MaximumHitPoints;
+            }
+
+            foreach(InventoryItem ii in _player.Inventory)
+            {
+                if(ii.Details.ID == potion.ID)
+                {
+                    ii.Quantity--;
+                    break;
+                }
+
+                rtb_Messages.Text += "You drink a " + potion.Name + Environment.NewLine;
+
+                int damageToPlayer =
+                    RandomNumberGenerator.NumberBetween(
+                        0,
+                        _currentMonster.MaximumDamage);
+
+                rtb_Messages.Text += "The " + _currentMonster.Name + " did " +
+                    damageToPlayer.ToString() + " points of damage." + Environment.NewLine;
+
+                _player.CurrentHitPoints -= damageToPlayer;
+
+                if(_player.CurrentHitPoints <= 0)
+                {
+                    rtb_Messages.Text += "The " + _currentMonster.Name + " killed you " +
+                        Environment.NewLine;
+
+                    MoveTo(World.LocationByID(World.LOCATION_ID_HOME));
+                }
+
+                lbl_HitPoints.Text = _player.CurrentHitPoints.ToString();
+                UpdateInventoryListInUI();
+                UpdatePotionListInUI();
+            }
         }
     }
 }

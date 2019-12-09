@@ -214,20 +214,27 @@ namespace Engine
 
             // Link the locations together
             home.LocationToNorth = townSquare;
+
             townSquare.LocationToNorth = alchemistHut;
             townSquare.LocationToSouth = home;
             townSquare.LocationToEast = guardPost;
             townSquare.LocationToWest = farmhouse;
+
             farmhouse.LocationToEast = townSquare;
             farmhouse.LocationToWest = farmersField;
+
             farmersField.LocationToEast = farmhouse;
+
             alchemistHut.LocationToSouth = townSquare;
             alchemistHut.LocationToNorth = alchemistsGarden;
             alchemistsGarden.LocationToSouth = alchemistHut;
+
             guardPost.LocationToEast = bridge;
             guardPost.LocationToWest = townSquare;
+
             bridge.LocationToWest = guardPost;
             bridge.LocationToEast = spiderField;
+
             spiderField.LocationToWest = bridge;
 
             // Add the locations to the static list
