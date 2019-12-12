@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using Engine;
+using System.IO;
 
 namespace SimpleCSharpRpgGame
 {
@@ -16,19 +17,25 @@ namespace SimpleCSharpRpgGame
     {
         private Player _player;
         private Monster _currentMonster;
+        private const string PLAYER_DATA_FILE_NAME = "PlayerData.xml";
 
         public SimpleRpgFormGame()
         {
             InitializeComponent();
 
-            _player = new Player(10, 10, 20 , 0);
+            if(File.Exists(PLAYER_DATA_FILE_NAME))
+            {
+                _player = Player.CreatePlayerFromXmlString(
+                    File.ReadAllText(PLAYER_DATA_FILE_NAME));
+            }
+            else
+            {
+                _player = Player.CreateDefaultPlayer();
+            }
 
-            MoveTo(World.LocationByID(World.LOCATION_ID_HOME));
-
-            _player.Inventory.Add(new InventoryItem(World.ItemByID(World.ITEM_ID_RUSTY_SWORD),1));
+            MoveTo(World.LocationByID(_player.CurrentLocation.ID));
 
             UpdatePlayerStats();
-
             UpdateInventoryListInUI();
             UpdatePotionListInUI();
             UpdateQuestListInUI();
@@ -446,6 +453,11 @@ namespace SimpleCSharpRpgGame
                 UpdateInventoryListInUI();
                 UpdatePotionListInUI();
             }
+        }
+
+        private void SimpleRpgFormGame_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            File.WriteAllText(PLAYER_DATA_FILE_NAME, _player.ToXMLString());
         }
     }
 }
