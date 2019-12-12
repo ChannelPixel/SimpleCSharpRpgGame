@@ -289,6 +289,7 @@
             this.Controls.Add(this.label1);
             this.Name = "SimpleRpgFormGame";
             this.Text = "SimpleCSharpRpgGame";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SimpleRpgFormGame_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Inventory)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Quests)).EndInit();
             this.ResumeLayout(false);
