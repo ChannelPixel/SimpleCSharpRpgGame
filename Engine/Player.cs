@@ -10,20 +10,22 @@ namespace Engine
     {
         public int Gold { get; set; }
         public int ExperiencePoints { get; set; }
-        public int Level { get; set; }
+        public int Level
+        {
+            get { return ((ExperiencePoints / 100) + 1); }
+        }
 
         public List<InventoryItem> Inventory { get; set; }
         public List<PlayerQuest> Quests { get; set; }
 
         public Location CurrentLocation { get; set; }
 
-        public Player(int gold, int experiencePoints, int level,
-            int currentHitPoints, int maximumHitPoints)
+        public Player(int currentHitPoints, int maximumHitPoints,
+            int gold, int experiencePoints)
             : base(currentHitPoints, maximumHitPoints)
         {
             Gold = gold;
             ExperiencePoints = experiencePoints;
-            Level = level;
 
             Inventory = new List<InventoryItem>();
             Quests = new List<PlayerQuest>();
@@ -36,111 +38,85 @@ namespace Engine
                 return true;
             }
 
-            foreach (InventoryItem ii in Inventory)
-            {
-                if (ii.Details.ID == location.ItemRequiredToEnter.ID)
-                {
-
-                    return true;
-                }
-            }
-            return false;
+            //LAMBDA LINQ FOREACH substitute
+            //Lession 19.3
+            return Inventory.Exists(ii => ii.Details.ID == location.ItemRequiredToEnter.ID);
         }
 
         public bool HasThisQuest(Quest quest)
         {
-            foreach (PlayerQuest playerQuest in Quests)
-            {
-                if (playerQuest.Details.ID == quest.ID)
-                {
-                    return true;
-                }
-            }
-            return false;
+            //LAMBDA LINQ FOREACH substitute
+            //Lession 19.3
+            return Quests.Exists(ii => ii.Details.ID == quest.ID);
         }
+
         public bool CompletedThisQuest(Quest quest)
         {
-            foreach (PlayerQuest playerQuest in Quests)
-            {
-                if (playerQuest.Details.ID == quest.ID)
-                {
-                    return playerQuest.IsCompleted;
-                }
-            }
-            return false;
+            return Quests.Exists(pq => pq.Details.ID == quest.ID);
+
         }
 
         public bool HasAllQuestCompletionItems(Quest quest)
         {
-
             foreach (QuestCompletionItem qci in quest.QuestCompletionItems)
             {
-                bool foundItemInPlayersInventory = false;
-
-                foreach (InventoryItem ii in Inventory)
-                {
-
-                    if (ii.Details.ID == qci.Details.ID)
-                    {
-                        foundItemInPlayersInventory = true;
-
-                        if (ii.Quantity < qci.Quantity)
-                        {
-                            return false;
-                        }
-                    }
-                }
-
-                if (!foundItemInPlayersInventory)
+                if (Inventory.Exists(ii => ii.Details.ID == qci.Details.ID
+                                            && ii.Quantity < qci.Quantity))
                 {
                     return false;
                 }
             }
-
             return true;
+            
+
+            /*/19.3 Complex lambda expression with conditional
+            return quest.QuestCompletionItems.Exists(qci => {
+
+                if(Inventory.Exists(ii => ii.Details.ID == qci.Details.ID && ii.Quantity < qci.Quantity))
+                {
+                    return false;
+                }
+
+                return true;
+            });*/
         }
 
         public void RemoveQuestCompletionItems(Quest quest)
         {
             foreach (QuestCompletionItem qci in quest.QuestCompletionItems)
             {
-                foreach (InventoryItem ii in Inventory)
+                InventoryItem item = Inventory.SingleOrDefault(ii => ii.Details.ID == qci.Details.ID);
+
+                if (item != null)
                 {
-                    if (ii.Details.ID == qci.Details.ID)
-                    {
-                        ii.Quantity -= qci.Quantity;
-                        break;
-                    }
+                    item.Quantity -= qci.Quantity;
                 }
             }
         }
 
         public void AddItemToInventory(Item itemToAdd)
         {
-            foreach (InventoryItem ii in Inventory)
-            {
-                if (ii.Details.ID == itemToAdd.ID)
-                {
+            InventoryItem item = Inventory.SingleOrDefault(ii => ii.Details.ID == itemToAdd.ID);
 
-                    ii.Quantity++;
-                    return;
-                }
+            if (item == null)
+            {
+
+                Inventory.Add(new InventoryItem(itemToAdd, 1));
             }
-            Inventory.Add(new InventoryItem(itemToAdd, 1));
+            else
+            {
+
+                item.Quantity++;
+            }
         }
 
         public void MarkQuestCompleted(Quest quest)
         {
+            PlayerQuest playerQuest = Quests.SingleOrDefault(pq => pq.Details.ID == quest.ID);
 
-            foreach (PlayerQuest pq in Quests)
+            if (playerQuest != null)
             {
-                if (pq.Details.ID == quest.ID)
-                {
-
-                    pq.IsCompleted = true;
-
-                    return;
-                }
+                playerQuest.IsCompleted = true;
             }
         }
     }

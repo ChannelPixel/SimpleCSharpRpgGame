@@ -1,0 +1,5 @@
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\Engine\bin\Debug\Engine.dll
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\Engine\bin\Debug\Engine.pdb
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\Engine\obj\Debug\Engine.csprojAssemblyReference.cache
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\Engine\obj\Debug\Engine.dll
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\Engine\obj\Debug\Engine.pdb
