@@ -97,7 +97,14 @@ namespace SimpleCSharpRpgGame
             }
             else
             {
+                cbo_Weapons.SelectedIndexChanged -=
+                    cbo_Weapons_SelectedIndexChanged;
+
                 cbo_Weapons.DataSource = weapons;
+
+                cbo_Weapons.SelectedIndexChanged +=
+                    cbo_Weapons_SelectedIndexChanged;
+
                 cbo_Weapons.DisplayMember = "Name";
                 cbo_Weapons.ValueMember = "ID";
                 cbo_Weapons.SelectedIndex = 0;
@@ -190,7 +197,7 @@ namespace SimpleCSharpRpgGame
                                 " quest." + Environment.NewLine;
 
                             _player.RemoveQuestCompletionItems(newLocation.QuestAvailableHere);
-                            _player.ExperiencePoints += newLocation.QuestAvailableHere.RewardExperiencePoints;
+                            _player.AddExperiencePoints(newLocation.QuestAvailableHere.RewardExperiencePoints);
                             _player.Gold += newLocation.QuestAvailableHere.RewardGold;
                             _player.AddItemToInventory(newLocation.QuestAvailableHere.RewardItem);
                             _player.MarkQuestCompleted(newLocation.QuestAvailableHere);
@@ -315,7 +322,7 @@ namespace SimpleCSharpRpgGame
                 rtb_Messages.Text += "You defeated the " + _currentMonster.Name +
                     Environment.NewLine;
 
-                _player.ExperiencePoints += _currentMonster.RewardExperiencePoints;
+                _player.AddExperiencePoints(_currentMonster.RewardExperiencePoints);
                 rtb_Messages.Text += "You receive " +
                     _currentMonster.RewardExperiencePoints.ToString() + " experience points" + Environment.NewLine;
 
@@ -458,6 +465,11 @@ namespace SimpleCSharpRpgGame
         private void SimpleRpgFormGame_FormClosing(object sender, FormClosingEventArgs e)
         {
             File.WriteAllText(PLAYER_DATA_FILE_NAME, _player.ToXMLString());
+        }
+
+        private void cbo_Weapons_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _player.CurrentWeapon = (Weapon)cbo_Weapons.SelectedItem;
         }
     }
 }
