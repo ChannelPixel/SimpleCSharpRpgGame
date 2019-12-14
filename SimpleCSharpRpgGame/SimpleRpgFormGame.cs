@@ -33,48 +33,48 @@ namespace SimpleCSharpRpgGame
                 _player = Player.CreateDefaultPlayer();
             }
 
-            MoveTo(World.LocationByID(_player.CurrentLocation.ID));
+            lbl_HitPoints.DataBindings.Add("Text", _player, "CurrentHitPoints");
+            lbl_Gold.DataBindings.Add("Text", _player, "Gold");
+            lbl_Experience.DataBindings.Add("Text", _player, "ExperiencePoints");
+            lbl_Level.DataBindings.Add("Text", _player, "Level");
 
-            UpdatePlayerStats();
-            UpdateInventoryListInUI();
-            UpdatePotionListInUI();
-            UpdateQuestListInUI();
-            UpdateWeaponListInUI();
-        }
-
-        private void UpdateInventoryListInUI()
-        {
             dgv_Inventory.RowHeadersVisible = false;
-            dgv_Inventory.ColumnCount = 2;
-            dgv_Inventory.Columns[0].Name = "Name";
-            dgv_Inventory.Columns[0].Width = 197;
-            dgv_Inventory.Columns[1].Name = "Quantity";
-            dgv_Inventory.Rows.Clear();
-            foreach (InventoryItem inventoryItem in _player.Inventory)
-            {
-                if (inventoryItem.Quantity > 0)
-                {
-                    dgv_Inventory.Rows.Add(new[] { 
-                        inventoryItem.Details.Name,
-                        inventoryItem.Quantity.ToString() });
-                }
-            }
-        }
+            dgv_Inventory.AutoGenerateColumns = false;
 
-        private void UpdateQuestListInUI()
-        {
-            dgv_Quests.RowHeadersVisible = false;
-            dgv_Quests.ColumnCount = 2;
-            dgv_Quests.Columns[0].Name = "Name";
-            dgv_Quests.Columns[0].Width = 197;
-            dgv_Quests.Columns[1].Name = "Done?";
-            dgv_Quests.Rows.Clear();
-            foreach (PlayerQuest playerQuest in _player.Quests)
+            dgv_Inventory.DataSource = _player.Inventory;
+
+            dgv_Inventory.Columns.Add(new DataGridViewTextBoxColumn
             {
-                dgv_Quests.Rows.Add(new[] {
-                    playerQuest.Details.Name,
-                    playerQuest.IsCompleted.ToString() });
-            }
+                HeaderText = "Name",
+                Width = 197,
+                DataPropertyName = "Description"
+            });
+
+            dgv_Inventory.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Quantity",
+                DataPropertyName = "Quantity"
+            });
+
+            dgv_Quests.RowHeadersVisible = false;
+            dgv_Quests.AutoGenerateColumns = false;
+
+            dgv_Quests.DataSource = _player.Quests;
+
+            dgv_Quests.Columns.Add(new DataGridViewTextBoxColumn 
+            {
+                HeaderText = "Name",
+                Width = 197,
+                DataPropertyName = "Name"
+            });
+
+            dgv_Quests.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Done?",
+                DataPropertyName = "IsCompleted"
+            });
+
+            MoveTo(_player.CurrentLocation);
         }
 
         private void UpdateWeaponListInUI()
@@ -143,14 +143,6 @@ namespace SimpleCSharpRpgGame
         {
             rtb_Messages.SelectionStart = rtb_Messages.Text.Length;
             rtb_Messages.ScrollToCaret();
-        }
-
-        private void UpdatePlayerStats()
-        {
-            lbl_HitPoints.Text = _player.CurrentHitPoints.ToString();
-            lbl_Gold.Text = _player.Gold.ToString();
-            lbl_Experience.Text = _player.ExperiencePoints.ToString();
-            lbl_Level.Text = _player.Level.ToString();
         }
 
         private void MoveTo(Location newLocation)
@@ -273,9 +265,6 @@ namespace SimpleCSharpRpgGame
                 btn_UseWeapon.Visible = false;
             }
 
-            UpdatePlayerStats();
-            UpdateInventoryListInUI();
-            UpdateQuestListInUI();
             UpdateWeaponListInUI();
             UpdatePotionListInUI();
         }
@@ -373,9 +362,6 @@ namespace SimpleCSharpRpgGame
                     }
                 }
 
-                UpdatePlayerStats();
-
-                UpdateInventoryListInUI();
                 UpdateWeaponListInUI();
                 UpdatePotionListInUI();
 
@@ -397,8 +383,6 @@ namespace SimpleCSharpRpgGame
                 ScrollToBottomOfMessages();
 
                 _player.CurrentHitPoints -= damageToPlayer;
-
-                lbl_HitPoints.Text = _player.CurrentHitPoints.ToString();
 
                 if(_player.CurrentHitPoints <= 0)
                 {
@@ -455,9 +439,6 @@ namespace SimpleCSharpRpgGame
                     MoveTo(World.LocationByID(World.LOCATION_ID_HOME));
                 }
 
-                lbl_HitPoints.Text = _player.CurrentHitPoints.ToString();
-
-                UpdateInventoryListInUI();
                 UpdatePotionListInUI();
             }
         }
