@@ -111,7 +111,7 @@ namespace Engine
             Items.Add(new Weapon(ITEM_ID_CLUB, "Club", "Clubs", 3, 10));
             Items.Add(new HealingPotion(ITEM_ID_HEALING_POTION, "Healing Potions", "HealingPotions", 5));
             Items.Add(new Item(ITEM_ID_SPIDER_FANG, "Spider fang", "Spider fangs"));
-            Items.Add(new Item(ITEM_ID_SPIDER_FANG, "Spider silk", "Spider silks"));
+            Items.Add(new Item(ITEM_ID_SPIDER_SILK, "Spider silk", "Spider silks"));
             Items.Add(new Item(ITEM_ID_ADVENTURER_PASS, "Adventurer pass", "Adventurer passes"));
         }
 

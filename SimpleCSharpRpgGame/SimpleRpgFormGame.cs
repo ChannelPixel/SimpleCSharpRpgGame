@@ -16,7 +16,7 @@ namespace SimpleCSharpRpgGame
     public partial class SimpleRpgFormGame : Form
     {
         private Player _player;
-        private Monster _currentMonster;
+        
         private const string PLAYER_DATA_FILE_NAME = "PlayerData.xml";
 
         public SimpleRpgFormGame()
@@ -74,69 +74,26 @@ namespace SimpleCSharpRpgGame
                 DataPropertyName = "IsCompleted"
             });
 
-            MoveTo(_player.CurrentLocation);
-        }
+            cbo_Weapons.DataSource = _player.Weapons;
+            cbo_Weapons.DisplayMember = "Name";
+            cbo_Weapons.ValueMember = "Id";
 
-        private void UpdateWeaponListInUI()
-        {
-            List<Weapon> weapons = new List<Weapon>();
-            foreach (InventoryItem inventoryItem in _player.Inventory)
+            if(_player.CurrentWeapon != null)
             {
-                if (inventoryItem.Details is Weapon)
-                {
-                    if (inventoryItem.Quantity > 0)
-                    {
-                        weapons.Add((Weapon)inventoryItem.Details);
-                    }
-                }
+                cbo_Weapons.SelectedItem = _player.CurrentWeapon;
             }
-            if (weapons.Count == 0)
-            {
-                cbo_Weapons.Visible = false;
-                btn_UseWeapon.Visible = false;
-            }
-            else
-            {
-                cbo_Weapons.SelectedIndexChanged -=
-                    cbo_Weapons_SelectedIndexChanged;
 
-                cbo_Weapons.DataSource = weapons;
+            cbo_Weapons.SelectedIndexChanged += cbo_Weapons_SelectedIndexChanged;
 
-                cbo_Weapons.SelectedIndexChanged +=
-                    cbo_Weapons_SelectedIndexChanged;
+            cbo_Potions.DataSource = _player.Potions;
+            cbo_Potions.DisplayMember = "Name";
+            cbo_Potions.ValueMember = "Id";
 
-                cbo_Weapons.DisplayMember = "Name";
-                cbo_Weapons.ValueMember = "ID";
-                cbo_Weapons.SelectedIndex = 0;
-            }
-        }
+            _player.PropertyChanged += PlayerOnPropertyChanged;
 
-        private void UpdatePotionListInUI()
-        {
-            List<HealingPotion> healingPotions = new List<HealingPotion>();
-            foreach (InventoryItem inventoryItem in _player.Inventory)
-            {
-                if (inventoryItem.Details is HealingPotion)
-                {
-                    if (inventoryItem.Quantity > 0)
-                    {
-                        healingPotions.Add(
-                        (HealingPotion)inventoryItem.Details);
-                    }
-                }
-            }
-            if (healingPotions.Count == 0)
-            {
-                cbo_Potions.Visible = false;
-                btn_UsePotion.Visible = false;
-            }
-            else
-            {
-                cbo_Potions.DataSource = healingPotions;
-                cbo_Potions.DisplayMember = "Name";
-                cbo_Potions.ValueMember = "ID";
-                cbo_Potions.SelectedIndex = 0;
-            }
+            _player.OnMessage += DisplayMessage;
+
+            _player.MoveTo(_player.CurrentLocation);
         }
 
         private void ScrollToBottomOfMessages()
@@ -145,302 +102,38 @@ namespace SimpleCSharpRpgGame
             rtb_Messages.ScrollToCaret();
         }
 
-        private void MoveTo(Location newLocation)
-        {
-            if (!_player.HasRequiredItemToEnterThisLocation(newLocation))
-            {
-                rtb_Messages.Text += "You must have a " +
-                newLocation.ItemRequiredToEnter.Name +
-                " to enter this location." + Environment.NewLine;
-                ScrollToBottomOfMessages();
-                return;
-            }
 
-            _player.CurrentLocation = newLocation;
-
-            btn_North.Visible = (newLocation.LocationToNorth != null);
-            btn_East.Visible = (newLocation.LocationToEast != null);
-            btn_South.Visible = (newLocation.LocationToSouth != null);
-            btn_West.Visible = (newLocation.LocationToWest != null);
-
-            rtb_Location.Text = newLocation.Name + Environment.NewLine;
-            rtb_Location.Text += newLocation.Description + Environment.NewLine;
-
-            _player.CurrentHitPoints = _player.MaximumHitPoints;
-
-            lbl_HitPoints.Text = _player.CurrentHitPoints.ToString();
-
-            if(newLocation.QuestAvailableHere != null)
-            {
-                bool playerAlreadyHasQuest = _player.HasThisQuest(newLocation.QuestAvailableHere);
-                bool playerAlreadyCompletedQuest = _player.CompletedThisQuest(newLocation.QuestAvailableHere);
-
-                if (playerAlreadyHasQuest)
-                {
-                    if(!playerAlreadyCompletedQuest)
-                    {
-                        bool playerHasAllItemsToCompleteQuest = _player.HasAllQuestCompletionItems(newLocation.QuestAvailableHere);
-
-                        if(playerHasAllItemsToCompleteQuest)
-                        {
-                            rtb_Messages.Text += Environment.NewLine;
-                            rtb_Messages.Text += "You complete the " +
-                                newLocation.QuestAvailableHere.Name +
-                                " quest." + Environment.NewLine;
-
-                            _player.RemoveQuestCompletionItems(newLocation.QuestAvailableHere);
-                            _player.AddExperiencePoints(newLocation.QuestAvailableHere.RewardExperiencePoints);
-                            _player.Gold += newLocation.QuestAvailableHere.RewardGold;
-                            _player.AddItemToInventory(newLocation.QuestAvailableHere.RewardItem);
-                            _player.MarkQuestCompleted(newLocation.QuestAvailableHere);
-
-                            rtb_Messages.Text += "You receive: " + Environment.NewLine;
-                            rtb_Messages.Text +=
-                                newLocation.QuestAvailableHere.RewardExperiencePoints.ToString() + " experience points" + Environment.NewLine;
-                            rtb_Messages.Text +=
-                                newLocation.QuestAvailableHere.RewardGold.ToString() + " gold" + Environment.NewLine;
-                            rtb_Messages.Text +=
-                                newLocation.QuestAvailableHere.RewardItem.Name.ToString() + Environment.NewLine;
-                            ScrollToBottomOfMessages();
-                        }
-                    }
-                }
-                else
-                {
-                    rtb_Messages.Text += "You receive the " +
-                        newLocation.QuestAvailableHere.Name +
-                        " quest." + Environment.NewLine;
-                    rtb_Messages.Text += newLocation.QuestAvailableHere.Description +
-                        Environment.NewLine;
-                    rtb_Messages.Text += "To complete it, return with:" +
-                        Environment.NewLine;
-
-                    foreach(QuestCompletionItem qci in newLocation.QuestAvailableHere.QuestCompletionItems)
-                    {
-                        if(qci.Quantity == 1)
-                        {
-                            rtb_Messages.Text += qci.Quantity.ToString() + " " +
-                                qci.Details.Name + Environment.NewLine;
-                        }
-                        else
-                        {
-                            rtb_Messages.Text += qci.Quantity.ToString() + " " +
-                                qci.Details.NamePlural + Environment.NewLine;
-                        }
-                    }
-                    rtb_Messages.Text += Environment.NewLine;
-                    ScrollToBottomOfMessages();
-                    _player.Quests.Add(new PlayerQuest(newLocation.QuestAvailableHere));
-                }
-            }
-
-            if(newLocation.MonsterLivingHere != null)
-            {
-                rtb_Messages.Text += "You see a "
-                    + newLocation.MonsterLivingHere.Name + Environment.NewLine;
-                ScrollToBottomOfMessages();
-                Monster standardMonster = World.MonsterByID(
-                    newLocation.MonsterLivingHere.ID);
-
-                _currentMonster = new Monster(standardMonster.ID, standardMonster.Name, standardMonster.MaximumDamage,
-                    standardMonster.RewardExperiencePoints, standardMonster.RewardGold, standardMonster.CurrentHitPoints,
-                    standardMonster.MaximumHitPoints);
-
-                foreach(LootItem lootItem in standardMonster.LootTable)
-                {
-                    _currentMonster.LootTable.Add(lootItem);
-                }
-
-                cbo_Weapons.Visible = true;
-                cbo_Potions.Visible = true;
-                btn_UseWeapon.Visible = true;
-                btn_UseWeapon.Visible = true;
-            }
-            else
-            {
-                _currentMonster = null;
-                cbo_Weapons.Visible = false;
-                cbo_Potions.Visible = false;
-                btn_UseWeapon.Visible = false;
-                btn_UseWeapon.Visible = false;
-            }
-
-            UpdateWeaponListInUI();
-            UpdatePotionListInUI();
-        }
 
         private void btn_North_Click(object sender, EventArgs e)
         {
-            MoveTo(_player.CurrentLocation.LocationToNorth);
+            _player.MoveNorth();
         }
-
-        private void btn_West_Click(object sender, EventArgs e)
-        {
-            MoveTo(_player.CurrentLocation.LocationToWest);
-        }
-
         private void btn_East_Click(object sender, EventArgs e)
         {
-            MoveTo(_player.CurrentLocation.LocationToEast);
+            _player.MoveEast();
         }
-
         private void btn_South_Click(object sender, EventArgs e)
         {
-            MoveTo(_player.CurrentLocation.LocationToSouth);
+            _player.MoveSouth();
+        }
+        private void btn_West_Click(object sender, EventArgs e)
+        {
+            _player.MoveWest();
         }
 
         private void btn_UseWeapon_Click(object sender, EventArgs e)
         {
             Weapon currentWeapon = (Weapon)cbo_Weapons.SelectedItem;
 
-            int damageToMonster = RandomNumberGenerator.NumberBetween(
-                currentWeapon.MinimumDamage,
-                currentWeapon.MaximumDamage);
+            _player.UseWeapon(currentWeapon);
 
-            _currentMonster.CurrentHitPoints -= damageToMonster;
-
-            rtb_Messages.Text += "You hit the " +
-                _currentMonster.Name + " for " +
-                damageToMonster.ToString() + " points." + Environment.NewLine;
-
-            ScrollToBottomOfMessages();
-
-            if (_currentMonster.CurrentHitPoints <= 0)
-            {
-                rtb_Messages.Text += Environment.NewLine;
-                rtb_Messages.Text += "You defeated the " + _currentMonster.Name +
-                    Environment.NewLine;
-
-                _player.AddExperiencePoints(_currentMonster.RewardExperiencePoints);
-                rtb_Messages.Text += "You receive " +
-                    _currentMonster.RewardExperiencePoints.ToString() + " experience points" + Environment.NewLine;
-
-                _player.Gold += _currentMonster.RewardGold;
-                rtb_Messages.Text += "You receive " +
-                    _currentMonster.RewardGold.ToString() + " gold" + Environment.NewLine;
-
-                ScrollToBottomOfMessages();
-
-                List<InventoryItem> lootedItems = new List<InventoryItem>();
-
-                foreach(LootItem lootItem in _currentMonster.LootTable)
-                {
-                    if(RandomNumberGenerator.NumberBetween(1,100) <= lootItem.DropPercentage)
-                    {
-                        lootedItems.Add(new InventoryItem(lootItem.Details, 1));
-                    }
-                }
-
-                if(lootedItems.Count == 0)
-                {
-                    foreach(LootItem lootItem in _currentMonster.LootTable)
-                    {
-                        if (lootItem.IsDefaultItem)
-                        {
-                            lootedItems.Add(new InventoryItem(lootItem.Details, 1));
-                        }
-                    }
-                }
-
-                foreach(InventoryItem inventoryItem in lootedItems)
-                {
-                    _player.AddItemToInventory(inventoryItem.Details);
-
-                    if (inventoryItem.Quantity == 1)
-                    {
-                        rtb_Messages.Text += "You loot " +
-                        inventoryItem.Quantity.ToString() + " " +
-                        inventoryItem.Details.Name + Environment.NewLine;
-                        ScrollToBottomOfMessages();
-                    }
-                    else
-                    {
-                        rtb_Messages.Text += "You loot " +
-                        inventoryItem.Quantity.ToString() + " " +
-                        inventoryItem.Details.NamePlural + Environment.NewLine;
-                        ScrollToBottomOfMessages();
-                    }
-                }
-
-                UpdateWeaponListInUI();
-                UpdatePotionListInUI();
-
-                rtb_Messages.Text += Environment.NewLine;
-
-                ScrollToBottomOfMessages();
-
-                MoveTo(_player.CurrentLocation);
-            }
-            else
-            {
-                int damageToPlayer = RandomNumberGenerator.NumberBetween(
-                    0,
-                    _currentMonster.MaximumDamage);
-
-                rtb_Messages.Text += "The " + _currentMonster.Name + " did " +
-                    damageToPlayer.ToString() + " points of damage." + Environment.NewLine;
-
-                ScrollToBottomOfMessages();
-
-                _player.CurrentHitPoints -= damageToPlayer;
-
-                if(_player.CurrentHitPoints <= 0)
-                {
-                    rtb_Messages.Text += "The " + _currentMonster.Name + " killed you" +
-                        Environment.NewLine;
-
-                    ScrollToBottomOfMessages();
-
-                    MoveTo(World.LocationByID(World.LOCATION_ID_HOME));
-                }
-            }
         }
 
         private void btn_UsePotion_Click(object sender, EventArgs e)
         {
             HealingPotion potion = (HealingPotion)cbo_Potions.SelectedItem;
 
-            _player.CurrentHitPoints = (_player.CurrentHitPoints + potion.AmountToHeal);
-
-            if(_player.CurrentHitPoints > _player.MaximumHitPoints)
-            {
-                _player.CurrentHitPoints = _player.MaximumHitPoints;
-            }
-
-            foreach(InventoryItem ii in _player.Inventory)
-            {
-                if(ii.Details.ID == potion.ID)
-                {
-                    ii.Quantity--;
-                    break;
-                }
-
-                rtb_Messages.Text += "You drink a " + potion.Name + Environment.NewLine;
-
-                int damageToPlayer =
-                    RandomNumberGenerator.NumberBetween(
-                        0,
-                        _currentMonster.MaximumDamage);
-
-                rtb_Messages.Text += "The " + _currentMonster.Name + " did " +
-                    damageToPlayer.ToString() + " points of damage." + Environment.NewLine;
-
-                _player.CurrentHitPoints -= damageToPlayer;
-
-                ScrollToBottomOfMessages();
-
-                if (_player.CurrentHitPoints <= 0)
-                {
-                    rtb_Messages.Text += "The " + _currentMonster.Name + " killed you " +
-                        Environment.NewLine;
-
-                    ScrollToBottomOfMessages();
-
-                    MoveTo(World.LocationByID(World.LOCATION_ID_HOME));
-                }
-
-                UpdatePotionListInUI();
-            }
+            _player.UsePotion(potion);
         }
 
         private void SimpleRpgFormGame_FormClosing(object sender, FormClosingEventArgs e)
@@ -451,6 +144,71 @@ namespace SimpleCSharpRpgGame
         private void cbo_Weapons_SelectedIndexChanged(object sender, EventArgs e)
         {
             _player.CurrentWeapon = (Weapon)cbo_Weapons.SelectedItem;
+        }
+
+        private void PlayerOnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
+        {
+            if (propertyChangedEventArgs.PropertyName == "CurrentLocation")
+            {
+                // Show/hide available movement buttons
+                btn_North.Visible = (_player.CurrentLocation.LocationToNorth != null);
+                btn_East.Visible = (_player.CurrentLocation.LocationToEast != null);
+                btn_South.Visible = (_player.CurrentLocation.LocationToSouth != null);
+                btn_West.Visible = (_player.CurrentLocation.LocationToWest != null);
+                // Display current location name and description
+                rtb_Location.Text = _player.CurrentLocation.Name + Environment.NewLine;
+                rtb_Location.Text += _player.CurrentLocation.Description + Environment.NewLine;
+                if (_player.CurrentLocation.MonsterLivingHere == null)
+                {
+                    cbo_Weapons.Visible = false;
+                    cbo_Potions.Visible = false;
+                    btn_UseWeapon.Visible = false;
+                    btn_UsePotion.Visible = false;
+                }
+                else
+                {
+                    cbo_Weapons.Visible = _player.Weapons.Any();
+                    cbo_Potions.Visible = _player.Potions.Any();
+                    btn_UseWeapon.Visible = _player.Weapons.Any();
+                    btn_UsePotion.Visible = _player.Potions.Any();
+                }
+            }
+
+            if (propertyChangedEventArgs.PropertyName == "Weapons")
+            {
+                cbo_Weapons.DataSource = _player.Weapons;
+
+                if(!_player.Weapons.Any())
+                {
+                    cbo_Weapons.Visible = false;
+                    btn_UseWeapon.Visible = false;
+                }
+            }
+
+            if (propertyChangedEventArgs.PropertyName == "Potions")
+            {
+                cbo_Potions.DataSource = _player.Potions;
+
+                if (!_player.Potions.Any())
+                {
+                    cbo_Potions.Visible = false;
+                    btn_UsePotion.Visible = false;
+                }
+            }
+        }
+
+        private void DisplayMessage(object sender, MessageEventArgs messageEventArgs)
+        {
+            rtb_Messages.Text +=
+                messageEventArgs.Message + Environment.NewLine;
+
+            if(messageEventArgs.AddExtraNewLine)
+            {
+                rtb_Messages.Text += Environment.NewLine;
+            }
+
+            rtb_Messages.SelectionStart = rtb_Messages.Text.Length;
+            rtb_Messages.ScrollToCaret();
         }
     }
 }
