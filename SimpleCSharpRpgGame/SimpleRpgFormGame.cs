@@ -136,6 +136,13 @@ namespace SimpleCSharpRpgGame
             _player.UsePotion(potion);
         }
 
+        private void btn_Trade_Click(object sender, EventArgs e)
+        {
+            TradingScreen tradingScreen = new TradingScreen(_player);
+            tradingScreen.StartPosition = FormStartPosition.CenterParent;
+            tradingScreen.ShowDialog(this);
+        }
+
         private void SimpleRpgFormGame_FormClosing(object sender, FormClosingEventArgs e)
         {
             File.WriteAllText(PLAYER_DATA_FILE_NAME, _player.ToXMLString());
@@ -155,6 +162,7 @@ namespace SimpleCSharpRpgGame
                 btn_East.Visible = (_player.CurrentLocation.LocationToEast != null);
                 btn_South.Visible = (_player.CurrentLocation.LocationToSouth != null);
                 btn_West.Visible = (_player.CurrentLocation.LocationToWest != null);
+                btn_Trade.Visible = (_player.CurrentLocation.VendorWorkingHere != null);
                 // Display current location name and description
                 rtb_Location.Text = _player.CurrentLocation.Name + Environment.NewLine;
                 rtb_Location.Text += _player.CurrentLocation.Description + Environment.NewLine;

@@ -10,3 +10,4 @@ Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\obj\Debug\Simple
 Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\obj\Debug\SimpleCSharpRpgGame.csproj.CopyComplete
 Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\obj\Debug\SimpleCSharpRpgGame.exe
 Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\obj\Debug\SimpleCSharpRpgGame.pdb
+Z:\Github\Windows Forms\SimpleCSharpRpgGame\SimpleCSharpRpgGame\obj\Debug\SimpleCSharpRpgGame.TradingScreen.resources

@@ -49,6 +49,7 @@
             this.rtb_Messages = new System.Windows.Forms.RichTextBox();
             this.dgv_Inventory = new System.Windows.Forms.DataGridView();
             this.dgv_Quests = new System.Windows.Forms.DataGridView();
+            this.btn_Trade = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Inventory)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Quests)).BeginInit();
             this.SuspendLayout();
@@ -210,6 +211,16 @@
             this.btn_West.Text = "West";
             this.btn_West.UseVisualStyleBackColor = true;
             this.btn_West.Click += new System.EventHandler(this.btn_West_Click);
+            //
+            // btn_Trade
+            //
+            this.btn_Trade.Location = new System.Drawing.Point(493, 620);
+            this.btn_Trade.Name = "btnTrade";
+            this.btn_Trade.Size = new System.Drawing.Size(75, 23);
+            this.btn_Trade.TabIndex = 21;
+            this.btn_Trade.Text = "Trade";
+            this.btn_Trade.UseVisualStyleBackColor = true;
+            this.btn_Trade.Click += new System.EventHandler(this.btn_Trade_Click);
             // 
             // rtb_Location
             // 
@@ -277,6 +288,7 @@
             this.Controls.Add(this.btn_North);
             this.Controls.Add(this.btn_UsePotion);
             this.Controls.Add(this.btn_UseWeapon);
+            this.Controls.Add(this.btn_Trade);
             this.Controls.Add(this.cbo_Potions);
             this.Controls.Add(this.cbo_Weapons);
             this.Controls.Add(this.label5);
@@ -317,6 +329,7 @@
         private System.Windows.Forms.Button btn_East;
         private System.Windows.Forms.Button btn_South;
         private System.Windows.Forms.Button btn_West;
+        private System.Windows.Forms.Button btn_Trade;
         private System.Windows.Forms.RichTextBox rtb_Location;
         private System.Windows.Forms.RichTextBox rtb_Messages;
         private System.Windows.Forms.DataGridView dgv_Inventory;
